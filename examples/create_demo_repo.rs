@@ -32,11 +32,11 @@ fn main() {
                             .child(
                                 commit("Alternative logo")
                                 .write("logo.txt", "***---Foo---***")
-                                .branch("logo")
+                                .branch("user/john/logo")
                                 .child(
                                     commit("Tweak alternative logo")
                                     .write("logo.txt", "*---Foo---*")
-                                    .branch("logo2")
+                                    .branch("user/john/logo-large")
                                 )
                             )
                             .child(
@@ -70,19 +70,19 @@ fn main() {
                     .child(
                         commit("More readme WIP")
                         .write("Readme.md", "This is a really great project")
-                        .branch("readme")
+                        .branch("dev")
                     )
                 )
                 .child(
                     commit("Make sweet asciinema demo")
                     .write("demo.asciinema", "...")
-                    .branch("demo")
+                    .branch("user/taylor/dev")
                 )
             )
             .child(
                 commit("Fix spelling")
                 .write("spec.txt", "Specification: Do nothing")
-                .branch("spelling")
+                .branch("task-104/spelling")
             )
         );
 

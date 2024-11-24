@@ -8,7 +8,13 @@ name = "autorebase"
 repository = "https://github.com/Timmmm/autorebase"
 version = "0.7.0"
 
+[[bin]]
+name = "git-auto"
+path = "src/main.rs"
+
+
 [dependencies]
+clap = { version ="4.5.21", features = ["derive", "color", "suggestions"] }
 anyhow = "1.0.86"
 argh = "0.1.12"
 colored = "2.1.0"
