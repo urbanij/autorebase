@@ -1,38 +1,41 @@
 // Tool to automatically rebase branches.
 
 use anyhow::Result;
-use argh::FromArgs;
-
 use autorebase::autorebase;
+use autorebase::{Args, OpType, Operation};
 
-use std::env::current_dir;
+use std::{env::current_dir, process::Command};
 
-#[derive(FromArgs)]
-/// Automatically pull the master branch and rebase all branches without
-/// upstreams onto it.
-struct CliOptions {
-    /// the target branch to pull and rebase onto;
-    /// defaults to `git config --get init.defaultBranch` or `master` if unset
-    #[argh(option)]
-    onto: Option<String>,
+use clap::{Parser, Subcommand};
 
-    /// if there are conflicts, try rebasing commit by commit backwards from the
-    /// target, instead of trying to determined the conflicting commit on the
-    /// target branch directly
-    #[argh(switch)]
-    slow: bool,
+#[derive(Parser)]
+#[command(name = "git-auto")]
+#[command(about = "A Git automation tool", long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Operation,
+}
 
-    /// include branches which have an upstream, the default is to exclude these
-    #[argh(switch)]
-    include_non_local: bool,
+fn handle_rebase(args: Args) -> Result<()> {
+    autorebase(
+        &current_dir()?,
+        args.onto.as_deref(),
+        args.slow,
+        args.include_non_local,
+        args.match_branches.as_deref(),
+        OpType::Rebase,
+    )
+}
 
-    /// branch matching glob, the default is all branches
-    #[argh(option)]
-    match_branches: Option<String>,
-
-    /// RUST_LOG-style logging string, e.g. --log debug
-    #[argh(option)]
-    log: Option<String>,
+fn handle_merge(args: Args) -> Result<()> {
+    autorebase(
+        &current_dir()?,
+        args.onto.as_deref(),
+        args.slow,
+        args.include_non_local,
+        args.match_branches.as_deref(),
+        OpType::Merge,
+    )
 }
 
 fn main() -> Result<()> {
@@ -46,19 +49,12 @@ fn main() -> Result<()> {
 }
 
 fn run() -> Result<()> {
-    let options: CliOptions = argh::from_env();
+    let cli = Cli::parse();
 
-    env_logger::Builder::new()
-        .parse_filters(&options.log.unwrap_or_default())
-        .init();
-
-    autorebase(
-        &current_dir()?,
-        options.onto.as_deref(),
-        options.slow,
-        options.include_non_local,
-        options.match_branches.as_deref(),
-    )?;
+    match cli.command {
+        Operation::Rebase(args) => handle_rebase(args)?,
+        Operation::Merge(args) => handle_merge(args)?,
+    }
 
     Ok(())
 }

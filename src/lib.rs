@@ -17,6 +17,8 @@ mod glob;
 use glob::*;
 mod trim;
 use trim::*;
+mod types;
+pub use types::{Args, OpType, Operation};
 
 // Set GIT_COMMITTER_DATE to now to prevent getting inconsistent hashes when
 // rebasing the same commit multiple times.
@@ -48,6 +50,7 @@ pub fn autorebase(
     slow_conflict_detection: bool,
     include_non_local: bool,
     match_branches: Option<&str>,
+    operation: OpType,
 ) -> Result<()> {
     // Check the git version. `git switch` was introduced in 2.23.
     if git_version()?.as_slice() < &[2, 23] {
@@ -156,6 +159,7 @@ pub fn autorebase(
             &onto_branch,
             &autorebase_worktree_path,
             slow_conflict_detection,
+            &operation,
         )?;
     }
 
@@ -228,6 +232,7 @@ fn rebase_branch(
     onto_branch: &str,
     worktree_path: &Path,
     slow_conflict_detection: bool,
+    operation: &OpType,
 ) -> Result<(), anyhow::Error> {
     eprintln!("• Rebasing {} ...", branch.branch.bold());
 
@@ -271,7 +276,8 @@ fn rebase_branch(
         for target_commit in target_commit_list {
             eprintln!("    - Rebasing onto {}", target_commit.bold());
 
-            let result = attempt_rebase(git_common_dir, rebase_worktree_path, &target_commit)?;
+            let result =
+                attempt_rebase(git_common_dir, rebase_worktree_path, &target_commit, None)?;
             match result {
                 RebaseResult::Success => {
                     eprintln!("{}", "    - Success!".green());
@@ -285,7 +291,12 @@ fn rebase_branch(
             }
         }
     } else {
-        let result = attempt_rebase(git_common_dir, rebase_worktree_path, &target_commit_list[0])?;
+        let result = attempt_rebase(
+            git_common_dir,
+            rebase_worktree_path,
+            &target_commit_list[0],
+            None,
+        )?;
         match result {
             RebaseResult::Success => {
                 eprintln!("{}", "    - Success!".green());
@@ -323,6 +334,7 @@ fn rebase_branch(
                         git_common_dir,
                         rebase_worktree_path,
                         last_nonconflicting_commit,
+                        None,
                     )?;
                     match result {
                         RebaseResult::Success => {
@@ -508,8 +520,21 @@ enum RebaseResult {
 // `worktree_path` points to the worktree, which may be the same (`/foo`)
 // or may be another path. If we are using our private worktree it will be
 // something like `/foo/.git/autorebase/autorebase_worktree`.
-fn attempt_rebase(git_common_dir: &Path, worktree_path: &Path, onto: &str) -> Result<RebaseResult> {
-    let rebase_ok = git(&["rebase", onto], worktree_path);
+fn attempt_rebase(
+    git_common_dir: &Path,
+    worktree_path: &Path,
+    onto: &str,
+    operation: Option<&OpType>,
+) -> Result<RebaseResult> {
+    let rebase_ok = match operation {
+        Some(OpType::Rebase) => git(&["rebase", onto], worktree_path),
+        Some(OpType::Merge) => {
+            git(&["checkout", "-b", "dev/foo"], worktree_path)?;
+            git(&["merge", onto], worktree_path)
+        }
+        None => git(&["status", onto], worktree_path),
+    };
+
     if rebase_ok.is_ok() {
         return Ok(RebaseResult::Success);
     }

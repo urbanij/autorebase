@@ -1,0 +1,120 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'autorebase'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=autorebase"
+        ],
+        "filter": {
+          "name": "autorebase",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'autorebase'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=autorebase",
+          "--package=autorebase"
+        ],
+        "filter": {
+          "name": "autorebase",
+          "kind": "bin"
+        }
+      },
+      "args": ["--onto", "master", "--match-branches", "*"],
+      "cwd": "/tmp/.tmptDL8g5"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'autorebase'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=autorebase",
+          "--package=autorebase"
+        ],
+        "filter": {
+          "name": "autorebase",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug example 'create_demo_repo'",
+      "cargo": {
+        "args": [
+          "build",
+          "--example=create_demo_repo",
+          "--package=autorebase"
+        ],
+        "filter": {
+          "name": "create_demo_repo",
+          "kind": "example"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in example 'create_demo_repo'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--example=create_demo_repo",
+          "--package=autorebase"
+        ],
+        "filter": {
+          "name": "create_demo_repo",
+          "kind": "example"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'all'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=all",
+          "--package=autorebase"
+        ],
+        "filter": {
+          "name": "all",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
