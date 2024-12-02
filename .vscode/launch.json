@@ -26,34 +26,34 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug executable 'autorebase'",
+      "name": "Debug executable 'git-auto'",
       "cargo": {
         "args": [
           "build",
-          "--bin=autorebase",
+          "--bin=git-auto",
           "--package=autorebase"
         ],
         "filter": {
-          "name": "autorebase",
+          "name": "git-auto",
           "kind": "bin"
         }
       },
-      "args": ["--onto", "master", "--match-branches", "*"],
-      "cwd": "/tmp/.tmptDL8g5"
+      "args": ["merge","--onto", "foo", "--match-branches", "*"],
+      "cwd": "/var/folders/6g/bk54x9750mgdmg64tpfp57dm0000gn/T/.tmpkb9fpB"
     },
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in executable 'autorebase'",
+      "name": "Debug unit tests in executable 'git-auto'",
       "cargo": {
         "args": [
           "test",
           "--no-run",
-          "--bin=autorebase",
+          "--bin=git-auto",
           "--package=autorebase"
         ],
         "filter": {
-          "name": "autorebase",
+          "name": "git-auto",
           "kind": "bin"
         }
       },

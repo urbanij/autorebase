@@ -103,11 +103,19 @@ pub fn autorebase(
     eprint!("{}", "• Getting branches...".yellow());
     // We can get branches from any worktree.
     let all_branches = get_branches(&worktree_root_path)?;
-    let onto_branch_info = all_branches
-        .iter()
-        .find(|b| b.branch == onto_branch)
-        .ok_or_else(|| anyhow!("Couldn't find target branch '{}'. You can set the default target \
-                                    branch via 'git config init.defaultBranch' or use the --onto flag.", onto_branch))?;
+    let onto_branch_info = match operation {
+        OpType::Rebase => all_branches
+            .iter()
+            .find(|b| b.branch == onto_branch)
+            .ok_or_else(|| anyhow!("Couldn't find target branch '{}'. You can set the default target \
+                                        branch via 'git config init.defaultBranch' or use the --onto flag.", onto_branch))?,
+        OpType::Merge => {
+            all_branches
+            .iter()
+            .find(|b| b.branch != onto_branch)
+            .ok_or_else(|| anyhow!("Target branch '{}' exists.", onto_branch))?
+        },
+    };
     eprintln!("\r{}", "• Getting branches...".green());
 
     // Print a summary of the branches, and simultaneously filter them.
@@ -250,6 +258,8 @@ fn rebase_branch(
     conflicts.branches.remove(&branch.branch);
     conflicts.write_to_file(conflicts_path)?;
 
+    // match operation {
+    //     OpType::Rebase => {
     let merge_base = get_merge_base(worktree_path, &branch.branch, onto_branch)?;
 
     let target_commit_list = get_commit_list(worktree_path, &merge_base, onto_branch)?;
@@ -258,6 +268,11 @@ fn rebase_branch(
         eprintln!("    - No rebase necessary");
         return Ok(());
     }
+    // },
+    //     _ => {
+
+    //     }
+    // }
 
     // The worktree we will use for the rebase. If it is already checked out
     // in a worktree somewhere, use that one. Otherwise use our temporary one.
@@ -276,8 +291,12 @@ fn rebase_branch(
         for target_commit in target_commit_list {
             eprintln!("    - Rebasing onto {}", target_commit.bold());
 
-            let result =
-                attempt_rebase(git_common_dir, rebase_worktree_path, &target_commit, None)?;
+            let result = attempt_rebase(
+                git_common_dir,
+                rebase_worktree_path,
+                &target_commit,
+                operation,
+            )?;
             match result {
                 RebaseResult::Success => {
                     eprintln!("{}", "    - Success!".green());
@@ -295,7 +314,7 @@ fn rebase_branch(
             git_common_dir,
             rebase_worktree_path,
             &target_commit_list[0],
-            None,
+            operation,
         )?;
         match result {
             RebaseResult::Success => {
@@ -334,7 +353,7 @@ fn rebase_branch(
                         git_common_dir,
                         rebase_worktree_path,
                         last_nonconflicting_commit,
-                        None,
+                        operation,
                     )?;
                     match result {
                         RebaseResult::Success => {
@@ -524,15 +543,14 @@ fn attempt_rebase(
     git_common_dir: &Path,
     worktree_path: &Path,
     onto: &str,
-    operation: Option<&OpType>,
+    operation: &OpType,
 ) -> Result<RebaseResult> {
     let rebase_ok = match operation {
-        Some(OpType::Rebase) => git(&["rebase", onto], worktree_path),
-        Some(OpType::Merge) => {
+        OpType::Rebase => git(&["rebase", onto], worktree_path),
+        OpType::Merge => {
             git(&["checkout", "-b", "dev/foo"], worktree_path)?;
             git(&["merge", onto], worktree_path)
-        }
-        None => git(&["status", onto], worktree_path),
+        } // None => git(&["status", onto], worktree_path),
     };
 
     if rebase_ok.is_ok() {
