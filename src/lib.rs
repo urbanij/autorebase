@@ -38,6 +38,26 @@ fn set_committer_date_to_now() {
     );
 }
 
+fn prompt_confirmation() {
+    use std::io::{self, Write};
+
+    print!("Do you want to proceed? (yes/no)");
+
+    let mut input = String::new();
+    print!("> "); // Print a prompt indicator
+    io::stdout().flush().unwrap(); // Ensure prompt is displayed immediately
+
+    io::stdin().read_line(&mut input).unwrap();
+    let input = input.trim().to_lowercase();
+
+    if input == "yes" || input == "y" {
+        println!("Proceeding...");
+    } else {
+        println!("Action canceled.");
+        std::process::exit(0);
+    }
+}
+
 /// Autorebase all branches in the repo containing `path` onto the `onto_branch`
 /// (typically "master"). If `slow_conflict_detection` is true it will try every
 /// commit when there is a conflict until one works. Reliably but slow. If it is
@@ -157,6 +177,8 @@ pub fn autorebase(
 
     // Pull master.
     pull_master(onto_branch_info, &autorebase_worktree_path)?;
+
+    prompt_confirmation();
 
     for branch in rebase_branches.iter() {
         rebase_branch(

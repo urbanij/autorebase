@@ -64,6 +64,7 @@ mod test {
         assert!(glob_match("a*", "a"));
         assert!(glob_match("a*a", "aa"));
         assert!(glob_match("a*a", "aba"));
+        assert!(glob_match("a*a", "abcdaa"));
 
         assert!(glob_match("**", ""));
         assert!(glob_match("**", "a"));
@@ -74,12 +75,17 @@ mod test {
         assert!(glob_match("a**a", "aba"));
 
         assert!(glob_match("*a*a*", "aba"));
+        assert!(glob_match("**a*a*", "aba"));
 
         assert!(!glob_match("", "a"));
         assert!(!glob_match("*a", "b"));
         assert!(!glob_match("a*", "b"));
         assert!(!glob_match("*a", "ab"));
         assert!(!glob_match("a*", "ba"));
+
+        assert!(glob_match("foo", "foo"));
+        assert!(glob_match("foo*", "foo"));
+        assert!(glob_match("foo*", "foo/bar"));
 
         assert!(glob_match("a*bcd*bcd*ef", "aabcdbcdbcdabcdefefefggef"));
         assert!(!glob_match("a*bcd*bcd*ef", "abcdef"));
