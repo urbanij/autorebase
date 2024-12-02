@@ -18,8 +18,11 @@ pub fn git_fixed_dates() {
 /// Create a temporary directory and initialise it as a Git repo.
 pub fn create_temporary_git_repo() -> TempDir {
     let repo_dir = tempdir().expect("Couldn't create temporary directory");
+    #[cfg(git_supports_initial_branch)]
     git(&["init", "--initial-branch=master"], repo_dir.path())
         .expect("error initialising git repo");
+    git(&["init"], repo_dir.path()).expect("error initialising git repo");
+
     // You have to set these otherwise Git can't do commits.
     git(&["config", "user.email", "me@example.com"], repo_dir.path())
         .expect("error setting config");
