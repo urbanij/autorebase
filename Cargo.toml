@@ -1,12 +1,15 @@
 [package]
-authors = [ "Tim Hutt <timh@graphcore.ai>" ]
-description = "Automatically rebase feature branches onto master"
+authors = [
+  "Tim Hutt <timh@graphcore.ai>",
+  "Francesco Urbani <francescourbanidue@gmail.com>",
+]
+description = "Automate rebase and merge operations"
 edition = "2021"
 keywords = [ "git", "rebase" ]
 license = "MIT"
-name = "autorebase"
-repository = "https://github.com/Timmmm/autorebase"
-version = "0.7.0"
+name = "git_auto"
+repository = "https://github.com/urbanij/git-auto"
+version = "0.7.1"
 
 [[bin]]
 name = "git-auto"

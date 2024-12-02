@@ -1,12 +1,10 @@
 // Tool to automatically rebase branches.
 
 use anyhow::Result;
-use autorebase::autorebase;
-use autorebase::{Args, OpType, Operation};
-
-use std::{env::current_dir, process::Command};
-
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use git_auto::autorebase;
+use git_auto::{Args, OpType, Operation};
+use std::env::current_dir;
 
 #[derive(Parser)]
 #[command(name = "git-auto")]
